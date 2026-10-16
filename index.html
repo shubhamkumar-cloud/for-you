@@ -20,7 +20,8 @@
   .stage{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;text-align:center;padding:16px}
   .frame{position:relative;width:min(84vw,400px);aspect-ratio:1/1.08;
     animation:pop 1.8s cubic-bezier(.2,1.4,.4,1) both;}
-  .frame::before{content:"";position:absolute;inset:-16%;z-index:-1;background:radial-gradient(closest-side,rgba(255,80,140,.55),rgba(255,60,130,.22) 65%,transparent)}
+  .frame::before{content:"";position:absolute;inset:-16%;z-index:-1;background:radial-gradient(closest-side,rgba(255,80,140,.6),rgba(255,60,130,.25) 65%,transparent);animation:gl 2.4s ease-in-out infinite}
+  @keyframes gl{50%{opacity:.55;transform:scale(1.08)}}
   .frame .ring,.frame .inner{position:absolute;inset:0;clip-path:url(#heartClip)}
   .frame .ring{background:conic-gradient(from 0deg,#ff9ec4,#ffd6e8,#ff5f9e,#ffe3b3,#ff9ec4)}
   .frame .inner{transform:scale(.95);transform-origin:50% 46%;background:#000}
@@ -93,14 +94,14 @@ function drawHeart(i,x,y,s){ctx.drawImage(sprites[i],x-s/2,y,s,s)}
 const hearts=[],petals=[],sparks=[],bursts=[];
 function newHeart(initial){return{x:Math.random()*W,y:initial?Math.random()*H:H+30,s:14+Math.random()*30,v:.4+Math.random()*1,sw:Math.random()*6.28,sa:.4+Math.random()*1.2,c:Math.random()*colors.length|0,a:.3+Math.random()*.55}}
 function newPetal(initial){return{x:Math.random()*W,y:initial?Math.random()*H:-20,s:6+Math.random()*8,v:.6+Math.random()*1.1,r:Math.random()*6.28,vr:(Math.random()-.5)*.06,sw:Math.random()*6.28,c:Math.random()<.5?'#ff8fb7':'#ffc2d9'}}
-for(let i=0;i<14;i++)hearts.push(newHeart(true));
-for(let i=0;i<10;i++)petals.push(newPetal(true));
-for(let i=0;i<25;i++)sparks.push({x:Math.random()*W,y:Math.random()*H,r:Math.random()*1.5+.4,t:Math.random()*6.28,sp:.02+Math.random()*.04});
-function burst(x,y){for(let i=0;i<12;i++){const a=Math.random()*6.28,sp=2+Math.random()*4;bursts.push({x,y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp-2,s:16+Math.random()*22,c:Math.random()*colors.length|0,life:1})}}
+for(let i=0;i<26;i++)hearts.push(newHeart(true));
+for(let i=0;i<20;i++)petals.push(newPetal(true));
+for(let i=0;i<50;i++)sparks.push({x:Math.random()*W,y:Math.random()*H,r:Math.random()*1.5+.4,t:Math.random()*6.28,sp:.02+Math.random()*.04});
+function burst(x,y){for(let i=0;i<20;i++){const a=Math.random()*6.28,sp=2+Math.random()*4;bursts.push({x,y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp-2,s:16+Math.random()*22,c:Math.random()*colors.length|0,life:1})}}
 addEventListener('pointerdown',e=>burst(e.clientX,e.clientY));
 document.getElementById('gate').addEventListener('click',()=>{
   if(document.body.classList.contains('open'))return;
-  for(let i=0;i<3;i++)setTimeout(()=>burst(W/2+(Math.random()-.5)*160,H/2+(Math.random()-.5)*160),i*120);
+  for(let i=0;i<4;i++)setTimeout(()=>burst(W/2+(Math.random()-.5)*160,H/2+(Math.random()-.5)*160),i*120);
   document.body.classList.add('open');
   document.querySelectorAll('#scene .love span,#scene .sub,#scene .sub2').forEach(e=>e.style.animationPlayState='running');
   setTimeout(()=>document.getElementById('gate').remove(),2200);
