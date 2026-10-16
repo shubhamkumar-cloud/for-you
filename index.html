@@ -19,19 +19,19 @@
   canvas{position:fixed;inset:0;width:100%;height:100%;pointer-events:none}
   .stage{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;text-align:center;padding:16px}
   .frame{position:relative;width:min(84vw,400px);aspect-ratio:1/1.08;
-    animation:pop 1.8s cubic-bezier(.2,1.4,.4,1) both;
-    filter:drop-shadow(0 0 14px rgba(255,105,160,.8)) drop-shadow(0 0 50px rgba(255,60,130,.5))}
+    animation:pop 1.8s cubic-bezier(.2,1.4,.4,1) both;}
+  .frame::before{content:"";position:absolute;inset:-16%;z-index:-1;background:radial-gradient(closest-side,rgba(255,80,140,.55),rgba(255,60,130,.22) 65%,transparent)}
   .frame .ring,.frame .inner{position:absolute;inset:0;clip-path:url(#heartClip)}
-  .frame .ring{background:conic-gradient(from 0deg,#ff9ec4,#ffd6e8,#ff5f9e,#ffe3b3,#ff9ec4);animation:hue 6s linear infinite}
+  .frame .ring{background:conic-gradient(from 0deg,#ff9ec4,#ffd6e8,#ff5f9e,#ffe3b3,#ff9ec4)}
   .frame .inner{transform:scale(.95);transform-origin:50% 46%;background:#000}
   @keyframes hue{to{filter:hue-rotate(40deg)}}
   @keyframes pop{from{transform:scale(0) rotate(-20deg);opacity:0}to{transform:scale(1) rotate(0);opacity:1}}
   @keyframes beat{0%,100%{transform:scale(1)}15%{transform:scale(1.05)}30%{transform:scale(1)}45%{transform:scale(1.035)}}
   .frame img{position:absolute;display:block}
-  .frame img.bg{inset:-10%;width:120%;height:120%;object-fit:cover;filter:blur(16px) brightness(.85)}
+  .frame img.bg{inset:-10%;width:120%;height:120%;object-fit:cover;filter:blur(10px) brightness(.85)}
   .frame img.main{width:84%;height:auto;left:8%;top:-4%}
   .love{margin-top:22px;font-family:'Great Vibes','Dancing Script',cursive;font-size:clamp(54px,14vw,110px);line-height:1.15;
-    color:#ffd6e8;text-shadow:0 0 12px rgba(255,80,140,.9),0 0 30px rgba(255,60,130,.6);animation:glow 2.5s ease-in-out infinite}
+    color:#ffd6e8;text-shadow:0 0 12px rgba(255,80,140,.9),0 0 30px rgba(255,60,130,.6)}
   @keyframes glow{50%{text-shadow:0 0 20px rgba(255,120,170,1),0 0 50px rgba(255,60,130,.9);color:#fff}}
   .love span{display:inline-block;opacity:0;transform:translateY(30px) scale(.5);animation:letter .8s cubic-bezier(.2,1.5,.4,1) forwards}
   @keyframes letter{to{opacity:1;transform:none}}
@@ -46,7 +46,8 @@
   #scene{opacity:0;pointer-events:none;transition:opacity 1.2s ease}
   body.open #scene{opacity:1;pointer-events:auto}
   #gate{position:fixed;inset:0;z-index:5;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:opacity 1s ease .5s,transform 1.2s cubic-bezier(.6,0,.9,.4);-webkit-tap-highlight-color:transparent}
-  #gate .big{width:min(72vw,340px);animation:hb 1.2s ease-in-out infinite;filter:drop-shadow(0 0 30px rgba(255,50,120,.9)) drop-shadow(0 0 80px rgba(255,50,120,.5))}
+  #gate .big{width:min(72vw,340px);animation:hb 1.2s ease-in-out infinite;}
+  #gate::before{content:"";position:absolute;left:50%;top:50%;width:min(130vw,560px);aspect-ratio:1;transform:translate(-50%,-55%);border-radius:50%;background:radial-gradient(closest-side,rgba(255,50,120,.55),rgba(255,50,120,.15) 65%,transparent)}
   @keyframes hb{0%,100%{transform:scale(1)}15%{transform:scale(1.14)}30%{transform:scale(1)}45%{transform:scale(1.1)}}
   #gate .tap{margin-top:34px;font-size:clamp(24px,6vw,34px);color:#ffc8dd;animation:blink 1.8s ease-in-out infinite;text-shadow:0 0 14px rgba(255,80,140,.8)}
   @keyframes blink{50%{opacity:.35}}
@@ -78,69 +79,53 @@ const h=document.getElementById('love');
 [...text].forEach((ch,i)=>{const s=document.createElement('span');s.textContent=ch===' '?' ':ch;s.style.animationDelay=(1.2+i*.17)+'s';s.style.animationPlayState='paused';h.appendChild(s)});
 
 const cv=document.getElementById('c'),ctx=cv.getContext('2d');
-let W,H,dpr=Math.min(devicePixelRatio||1,2);
+let W,H,dpr=1;
 function size(){W=innerWidth;H=innerHeight;cv.width=W*dpr;cv.height=H*dpr;ctx.setTransform(dpr,0,0,dpr,0,0)}
 addEventListener('resize',size);size();
 
-function heartPath(x,y,s){
-  ctx.beginPath();
-  ctx.moveTo(x,y+s*.35);
-  ctx.bezierCurveTo(x,y,x-s*.5,y,x-s*.5,y+s*.35);
-  ctx.bezierCurveTo(x-s*.5,y+s*.7,x,y+s*.85,x,y+s);
-  ctx.bezierCurveTo(x,y+s*.85,x+s*.5,y+s*.7,x+s*.5,y+s*.35);
-  ctx.bezierCurveTo(x+s*.5,y,x,y,x,y+s*.35);
-  ctx.closePath();
-}
 const colors=['#ff3d7f','#ff6fa5','#ff9ec4','#ffc2d9','#ff5252','#ffd6e8'];
+const sprites=colors.map(c=>{
+  const k=document.createElement('canvas');k.width=k.height=64;const x=k.getContext('2d');
+  x.fillStyle=c;x.beginPath();x.moveTo(32,22);
+  x.bezierCurveTo(32,8,10,8,10,24);x.bezierCurveTo(10,40,32,50,32,60);
+  x.bezierCurveTo(32,50,54,40,54,24);x.bezierCurveTo(54,8,32,8,32,22);x.fill();return k});
+function drawHeart(i,x,y,s){ctx.drawImage(sprites[i],x-s/2,y,s,s)}
 const hearts=[],petals=[],sparks=[],bursts=[];
-function newHeart(initial){
-  return{x:Math.random()*W,y:initial?Math.random()*H:H+30,s:10+Math.random()*28,v:.4+Math.random()*1.1,
-    sw:Math.random()*Math.PI*2,sa:.4+Math.random()*1.2,c:colors[Math.random()*colors.length|0],a:.25+Math.random()*.6}
-}
-function newPetal(initial){
-  return{x:Math.random()*W,y:initial?Math.random()*H:-20,s:6+Math.random()*9,v:.6+Math.random()*1.2,
-    r:Math.random()*6.28,vr:(Math.random()-.5)*.06,sw:Math.random()*6.28,c:Math.random()<.5?'#ff8fb7':'#ffc2d9'}
-}
-for(let i=0;i<38;i++)hearts.push(newHeart(true));
-for(let i=0;i<30;i++)petals.push(newPetal(true));
-for(let i=0;i<70;i++)sparks.push({x:Math.random()*W,y:Math.random()*H,r:Math.random()*1.8+.4,t:Math.random()*6.28,sp:.02+Math.random()*.04});
-
-function burst(x,y){
-  for(let i=0;i<26;i++){
-    const a=Math.random()*6.28,sp=2+Math.random()*5;
-    bursts.push({x,y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp-2,s:8+Math.random()*18,c:colors[Math.random()*colors.length|0],life:1});
-  }
-}
+function newHeart(initial){return{x:Math.random()*W,y:initial?Math.random()*H:H+30,s:14+Math.random()*30,v:.4+Math.random()*1,sw:Math.random()*6.28,sa:.4+Math.random()*1.2,c:Math.random()*colors.length|0,a:.3+Math.random()*.55}}
+function newPetal(initial){return{x:Math.random()*W,y:initial?Math.random()*H:-20,s:6+Math.random()*8,v:.6+Math.random()*1.1,r:Math.random()*6.28,vr:(Math.random()-.5)*.06,sw:Math.random()*6.28,c:Math.random()<.5?'#ff8fb7':'#ffc2d9'}}
+for(let i=0;i<14;i++)hearts.push(newHeart(true));
+for(let i=0;i<10;i++)petals.push(newPetal(true));
+for(let i=0;i<25;i++)sparks.push({x:Math.random()*W,y:Math.random()*H,r:Math.random()*1.5+.4,t:Math.random()*6.28,sp:.02+Math.random()*.04});
+function burst(x,y){for(let i=0;i<12;i++){const a=Math.random()*6.28,sp=2+Math.random()*4;bursts.push({x,y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp-2,s:16+Math.random()*22,c:Math.random()*colors.length|0,life:1})}}
 addEventListener('pointerdown',e=>burst(e.clientX,e.clientY));
 document.getElementById('gate').addEventListener('click',()=>{
   if(document.body.classList.contains('open'))return;
-  for(let i=0;i<5;i++)setTimeout(()=>burst(W/2+(Math.random()-.5)*160,H/2+(Math.random()-.5)*160),i*120);
+  for(let i=0;i<3;i++)setTimeout(()=>burst(W/2+(Math.random()-.5)*160,H/2+(Math.random()-.5)*160),i*120);
   document.body.classList.add('open');
   document.querySelectorAll('#scene .love span,#scene .sub,#scene .sub2').forEach(e=>e.style.animationPlayState='running');
   setTimeout(()=>document.getElementById('gate').remove(),2200);
 });
-setInterval(()=>burst(Math.random()*W,Math.random()*H*.6),3500);
-
+setInterval(()=>{if(!document.hidden)burst(Math.random()*W,Math.random()*H*.6)},5000);
 function frame(){
   ctx.clearRect(0,0,W,H);
-  for(const s of sparks){s.t+=s.sp;ctx.globalAlpha=.3+.7*Math.abs(Math.sin(s.t));ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,6.28);ctx.fill()}
+  ctx.fillStyle='#fff';
+  for(const s of sparks){s.t+=s.sp;ctx.globalAlpha=.3+.7*Math.abs(Math.sin(s.t));ctx.fillRect(s.x,s.y,s.r*2,s.r*2)}
+  ctx.globalAlpha=.8;
   for(const p of petals){
     p.y+=p.v;p.sw+=.02;p.x+=Math.sin(p.sw)*.8;p.r+=p.vr;
-    ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.r);ctx.globalAlpha=.8;ctx.fillStyle=p.c;
+    ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.r);ctx.fillStyle=p.c;
     ctx.beginPath();ctx.ellipse(0,0,p.s,p.s*.55,0,0,6.28);ctx.fill();ctx.restore();
     if(p.y>H+20)Object.assign(p,newPetal(false));
   }
   for(const h of hearts){
     h.y-=h.v;h.sw+=.02;h.x+=Math.sin(h.sw)*h.sa*.5;
-    ctx.globalAlpha=h.a;ctx.fillStyle=h.c;ctx.shadowColor=h.c;ctx.shadowBlur=12;
-    heartPath(h.x,h.y,h.s);ctx.fill();ctx.shadowBlur=0;
+    ctx.globalAlpha=h.a;drawHeart(h.c,h.x,h.y,h.s);
     if(h.y<-40)Object.assign(h,newHeart(false));
   }
   for(let i=bursts.length-1;i>=0;i--){
-    const b=bursts[i];b.x+=b.vx;b.y+=b.vy;b.vy+=.12;b.life-=.012;
+    const b=bursts[i];b.x+=b.vx;b.y+=b.vy;b.vy+=.12;b.life-=.014;
     if(b.life<=0){bursts.splice(i,1);continue}
-    ctx.globalAlpha=b.life;ctx.fillStyle=b.c;ctx.shadowColor=b.c;ctx.shadowBlur=10;
-    heartPath(b.x,b.y,b.s*b.life+4);ctx.fill();ctx.shadowBlur=0;
+    ctx.globalAlpha=b.life;drawHeart(b.c,b.x,b.y,b.s*b.life+6);
   }
   ctx.globalAlpha=1;
   requestAnimationFrame(frame);
